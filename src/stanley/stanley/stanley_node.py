@@ -37,8 +37,8 @@ class Stanley(Node):
     def __init__(self):
         super().__init__('stanley_node')
         # create ROS subscribers and publishers
-        self.ego_odom_sub = self.create_subscription(Odometry, '/ego_racecar/odom', self.ego_odom_sub_callback, 10)
-        self.opp_odom_sub = self.create_subscription(Odometry, '/opp_racecar/odom', self.opp_odm_sub_callback, 10)
+        self.ego_odom_sub = self.create_subscription(Odometry, '/pf/pose/odom', self.ego_odom_sub_callback, 10)
+        self.opp_odom_sub = self.create_subscription(Odometry, '/opp/pf/pose/odom', self.opp_odm_sub_callback, 10)
         self.drive_pub = self.create_publisher(AckermannDriveStamped, '/drive', 10)
 
         # constants
