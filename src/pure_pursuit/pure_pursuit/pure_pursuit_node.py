@@ -5,8 +5,8 @@ from rclpy.node import Node
 import numpy as np
 from ackermann_msgs.msg import AckermannDriveStamped
 # TODO CHECK: include needed ROS msg type headers and libraries
-from nav_msgs.msg import Odometry
-from geometry_msgs.msg import PointStamped
+# from nav_msgs.msg import Odometry
+from geometry_msgs.msg import PoseStamped, PointStamped
 
 from sklearn.neighbors import KNeighborsRegressor
 from scipy.interpolate import interp1d
@@ -20,8 +20,8 @@ class PurePursuit(Node):
     def __init__(self):
         super().__init__('pure_pursuit_node')
         # TODO: create ROS subscribers and publishers
-        self.odom_sub = self.create_subscription(Odometry, '/opp_racecar/odom', self.odom_sub_callback, 10)
-        self.drive_pub = self.create_publisher(AckermannDriveStamped, '/opp_drive', 10)
+        self.odom_sub = self.create_subscription(PoseStamped, '/pf/viz/inferred_pose', self.odom_sub_callback, 10)
+        self.drive_pub = self.create_publisher(AckermannDriveStamped, '/drive', 10)
         self.waypoint_pub = self.create_publisher(PointStamped, '/waypoint', 10)
 
         # parameters
@@ -60,17 +60,15 @@ class PurePursuit(Node):
 
     def odom_sub_callback(self, odom_msg):
         # TODO: find the current waypoint to track using methods mentioned in lecture
-        current_position = np.array([[odom_msg.pose.pose.position.x, odom_msg.pose.pose.position.y]])
+        current_position = np.array([[odom_msg.pose.position.x, odom_msg.pose.position.y]])
         lookahead_position = self.kn_regressor.predict(current_position)
-
-        self.get_logger().info('Current Position: %f, %f' % (current_position[0][0], current_position[0][1]))
 
         # TODO: transform goal point to vehicle frame of reference
         arb = R.from_quat([
-            odom_msg.pose.pose.orientation.x, 
-            odom_msg.pose.pose.orientation.y, 
-            odom_msg.pose.pose.orientation.z, 
-            odom_msg.pose.pose.orientation.w])
+            odom_msg.pose.orientation.x, 
+            odom_msg.pose.orientation.y, 
+            odom_msg.pose.orientation.z, 
+            odom_msg.pose.orientation.w])
         lookahead_position_in_map_frame = np.insert(lookahead_position-current_position, 2, 0)
         lookahead_position_in_vehicle_frame = arb.inv().apply(lookahead_position_in_map_frame)
 
@@ -89,7 +87,7 @@ class PurePursuit(Node):
         self.get_logger().info('Publishing: steering_angle: %f, speed: %f' % (steering_angle, speed))
         self.drive_pub.publish(drive_msg)
 
-        # publish the waypoint
+        # publish waypoint
         waypoint_msg = PointStamped()
         waypoint_msg.point.x = lookahead_position[0][0]
         waypoint_msg.point.y = lookahead_position[0][1]

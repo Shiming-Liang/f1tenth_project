@@ -7,12 +7,12 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     # Launch the pure pursuit node
-    stanley_node = Node(
-        package='stanley',
-        executable='stanley_node',
-        namespace='ego',
+    pure_pursuit_node = Node(
+        package='pure_pursuit',
+        executable='pure_pursuit_node',
+        namespace='opp',
     )
 
     return LaunchDescription([
-        stanley_node
+        pure_pursuit_node
     ])
