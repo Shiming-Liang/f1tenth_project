@@ -14,4 +14,5 @@ def generate_launch_description():
 
     return LaunchDescription([
         stanley_node
+        stanley_node
     ])
