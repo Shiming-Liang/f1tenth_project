@@ -24,6 +24,8 @@ setup(
     entry_points={
         'console_scripts': [
             'stanley_node = stanley.stanley_node:main',
+            'mpc_node = stanley.mpc_node:main',
+            'mpc_plus_stanley = stanley.mpc_plus_stanley:main'
         ],
     },
 )
